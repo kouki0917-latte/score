@@ -481,11 +481,8 @@
           weighted_total: CRITERIA.reduce((sum, cr) => sum + (s[cr.key] || 0) * cr.weight, 0)
         }))
       };
-      await fetch(gasUrl, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const params = new URLSearchParams({ data: JSON.stringify(payload) });
+      await fetch(gasUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
       status.textContent = 'スプレッドシートに送信しました。';
     } catch (e) {
       status.textContent = 'データ送信に失敗しました: ' + e.message;
