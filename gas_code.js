@@ -1,32 +1,37 @@
 // =====================================================
 // Google Apps Script — スコア受信 & スプレッドシート書き込み
 // =====================================================
-// Scores シート：審査員ごとの生データを追記
-// Results シート：画像ごとの合計点を自動集計・降順表示
+// ・審査員名ごとに専用シートを作成
+// ・同じ審査員が再送信した場合は上書き（重複しない）
+// ・Results シート：全審査員の合計点を集計・降順表示
 // =====================================================
 
 function doGet(e) {
   try {
     const data = JSON.parse(e.parameter.data);
     const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const judgeName = data.judge;
 
-    // --- Scores シート ---
-    let scoresSheet = ss.getSheetByName('Scores');
-    if (!scoresSheet) {
-      scoresSheet = ss.insertSheet('Scores');
-    }
-    if (scoresSheet.getLastRow() === 0) {
-      scoresSheet.appendRow([
-        'Timestamp', 'Judge', 'Image', 'Completion', 'Contrast', 'Cup Balance', 'Weighted Total'
-      ]);
-      scoresSheet.getRange(1, 1, 1, 7).setFontWeight('bold');
+    // --- 審査員専用シートを取得 or 作成 ---
+    let judgeSheet = ss.getSheetByName(judgeName);
+    if (!judgeSheet) {
+      judgeSheet = ss.insertSheet(judgeName);
     }
 
-    // 各画像のスコアを追記
+    // 既存データを全クリア（上書き）
+    judgeSheet.clearContents();
+
+    // ヘッダー
+    judgeSheet.appendRow([
+      'Timestamp', 'Judge', 'Image', 'Completion', 'Contrast', 'Cup Balance', 'Weighted Total'
+    ]);
+    judgeSheet.getRange(1, 1, 1, 7).setFontWeight('bold');
+
+    // スコアを書き込み
     data.scores.forEach(s => {
-      scoresSheet.appendRow([
+      judgeSheet.appendRow([
         data.timestamp,
-        data.judge,
+        judgeName,
         s.imageUrl.replace(/^.*\//, ''),
         s.c1,
         s.c2,
@@ -35,23 +40,8 @@ function doGet(e) {
       ]);
     });
 
-    // --- Results シート ---
-    let resultsSheet = ss.getSheetByName('Results');
-    if (!resultsSheet) {
-      resultsSheet = ss.insertSheet('Results');
-    }
-
-    // 集計数式をセット（毎回上書きして最新状態を保つ）
-    resultsSheet.clearContents();
-    resultsSheet.getRange('A1').setValue('Image');
-    resultsSheet.getRange('B1').setValue('Total Score (all judges)');
-    resultsSheet.getRange('C1').setValue('Judge Count');
-    resultsSheet.getRange(1, 1, 1, 3).setFontWeight('bold');
-
-    // QUERY で画像ごとに合計・件数を集計し SORT で降順
-    resultsSheet.getRange('A2').setFormula(
-      '=IFERROR(SORT(QUERY(Scores!A2:G,"select C, sum(G), count(G) where C != \'\' group by C label C \'Image\', sum(G) \'Total\', count(G) \'Count\'"),2,FALSE),{"No data yet","",""})'
-    );
+    // --- Results シートを更新 ---
+    updateResults(ss);
 
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'ok' }))
@@ -62,4 +52,57 @@ function doGet(e) {
       .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+function updateResults(ss) {
+  // 審査員シート一覧（Results以外の全シート）
+  const excludeSheets = ['Results'];
+  const judgeSheets = ss.getSheets().filter(s => !excludeSheets.includes(s.getName()));
+
+  // 全審査員のデータを集める
+  // { imageName: { total: 合計点, judges: [審査員名, ...] } }
+  const imageMap = {};
+
+  judgeSheets.forEach(sheet => {
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return;
+    const rows = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
+    rows.forEach(row => {
+      const image = row[2];
+      const weightedTotal = parseFloat(row[6]) || 0;
+      const judge = row[1];
+      if (!image) return;
+      if (!imageMap[image]) imageMap[image] = { total: 0, judges: [] };
+      imageMap[image].total += weightedTotal;
+      imageMap[image].judges.push(judge);
+    });
+  });
+
+  // Results シートを作成 or クリア
+  let resultsSheet = ss.getSheetByName('Results');
+  if (!resultsSheet) {
+    resultsSheet = ss.insertSheet('Results');
+    // 先頭に移動
+    ss.setActiveSheet(resultsSheet);
+    ss.moveActiveSheet(1);
+  }
+  resultsSheet.clearContents();
+
+  // ヘッダー
+  resultsSheet.appendRow(['Rank', 'Image', 'Total Score', 'Judge Count', 'Judges']);
+  resultsSheet.getRange(1, 1, 1, 5).setFontWeight('bold');
+
+  // 合計点で降順ソート
+  const sorted = Object.entries(imageMap)
+    .sort((a, b) => b[1].total - a[1].total);
+
+  sorted.forEach(([image, info], i) => {
+    resultsSheet.appendRow([
+      i + 1,
+      image,
+      info.total,
+      info.judges.length,
+      info.judges.join(', ')
+    ]);
+  });
 }
