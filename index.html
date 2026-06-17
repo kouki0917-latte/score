@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>採点システム</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      background: #111;
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+
+    /* ===== スタート画面 ===== */
+    #screen-start {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 32px;
+      gap: 24px;
+    }
+
+    #screen-start h1 { font-size: 28px; font-weight: 700; letter-spacing: 0.06em; }
+    #screen-start p  { color: #aaa; font-size: 14px; }
+
+    .input-group { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 340px; }
+    .input-group label { font-size: 13px; color: #aaa; }
+    .input-group input {
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #1e1e1e;
+      color: #f0f0f0;
+      font-size: 15px;
+    }
+    .input-group input:focus { outline: none; border-color: #666; }
+
+    .btn-primary {
+      background: #f0f0f0;
+      color: #111;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      max-width: 340px;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ===== 採点画面 ===== */
+    #screen-score { display: none; flex-direction: column; min-height: 100vh; }
+
+    .score-header {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .score-header .judge-name { font-size: 13px; color: #888; }
+    .progress-text { font-size: 13px; color: #aaa; }
+
+    .progress-bar-wrap { height: 3px; background: #222; }
+    .progress-bar { height: 3px; background: #f0f0f0; transition: width 0.3s; }
+
+    .image-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      min-height: 40vh;
+    }
+
+    .image-area img {
+      max-width: 100%;
+      max-height: 50vh;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .image-placeholder {
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 4/3;
+      background: #1e1e1e;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #444;
+      font-size: 14px;
+    }
+
+    .scoring-panel {
+      background: #1a1a1a;
+      border-top: 1px solid #2a2a2a;
+      padding: 20px;
+    }
+
+    .criteria-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+
+    .criterion { display: flex; flex-direction: column; gap: 8px; }
+    .criterion-label { font-size: 13px; color: #bbb; font-weight: 500; }
+
+    .stars {
+      display: flex;
+      gap: 8px;
+    }
+
+    .star-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      border: 1.5px solid #333;
+      background: #222;
+      color: #666;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s;
+      font-weight: 700;
+    }
+
+    .star-btn:hover { border-color: #888; color: #ddd; }
+    .star-btn.selected { background: #f0f0f0; color: #111; border-color: #f0f0f0; }
+
+    .btn-row { display: flex; gap: 10px; }
+
+    .btn-next {
+      flex: 1;
+      background: #f0f0f0;
+      color: #111;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-next:hover { opacity: 0.85; }
+    .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ===== 完了画面 ===== */
+    #screen-done {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 32px;
+      gap: 16px;
+      text-align: center;
+    }
+    #screen-done h2 { font-size: 24px; font-weight: 700; }
+    #screen-done p  { color: #aaa; font-size: 14px; line-height: 1.7; }
+
+    .sending-msg { color: #888; font-size: 13px; }
+
+    /* ===== 管理者設定モーダル ===== */
+    .admin-toggle {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: #222;
+      border: 1px solid #333;
+      color: #666;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 24px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+
+    .modal label { font-size: 12px; color: #aaa; display: block; margin-bottom: 4px; margin-top: 12px; }
+    .modal input, .modal textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #f0f0f0;
+      font-size: 13px;
+      font-family: monospace;
+    }
+    .modal textarea { height: 140px; resize: vertical; }
+    .modal input:focus, .modal textarea:focus { outline: none; border-color: #555; }
+
+    .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-save {
+      flex: 1;
+      background: #f0f0f0;
+      color: #111;
+      border: none;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-cancel {
+      background: #2a2a2a;
+      color: #aaa;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 18px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .hint { font-size: 11px; color: #555; margin-top: 4px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<!-- ===== スタート画面 ===== -->
+<div id="screen-start">
+  <h1>採点システム</h1>
+  <p>審査員のお名前を入力して開始してください</p>
+  <div class="input-group">
+    <label>審査員名</label>
+    <input type="text" id="judge-name-input" placeholder="例：山田 太郎" />
+  </div>
+  <button class="btn-primary" id="btn-start" onclick="startScoring()">採点を開始する</button>
+</div>
+
+<!-- ===== 採点画面 ===== -->
+<div id="screen-score">
+  <div class="score-header">
+    <span class="judge-name" id="header-judge"></span>
+    <span class="progress-text" id="progress-text"></span>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <div class="image-area" id="image-area">
+    <div class="image-placeholder">画像を読み込み中...</div>
+  </div>
+
+  <div class="scoring-panel">
+    <div class="criteria-list" id="criteria-list"></div>
+    <div class="btn-row">
+      <button class="btn-next" id="btn-next" onclick="nextImage()" disabled>次へ →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 完了画面 ===== -->
+<div id="screen-done">
+  <h2>採点完了</h2>
+  <p id="done-msg">すべての作品の採点が完了しました。<br>ご協力ありがとうございました。</p>
+  <p class="sending-msg" id="sending-status"></p>
+</div>
+
+<!-- ===== 管理者ボタン ===== -->
+<button class="admin-toggle" onclick="openAdmin()">⚙ 管理者設定</button>
+
+<!-- ===== 管理者モーダル ===== -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal">
+    <h3>管理者設定</h3>
+
+    <label>審査項目 1</label>
+    <input type="text" id="cfg-c1" placeholder="例：構図・完成度" />
+
+    <label>審査項目 2</label>
+    <input type="text" id="cfg-c2" placeholder="例：創造性・独自性" />
+
+    <label>審査項目 3</label>
+    <input type="text" id="cfg-c3" placeholder="例：技術・表現力" />
+
+    <p class="hint" style="margin-top:12px">📁 画像は <code>figure/</code> フォルダに入れて、<code>bash generate_manifest.sh</code> を実行すると自動で読み込まれます。</p>
+
+    <label>Google Apps Script Web App URL</label>
+    <input type="text" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/xxxxx/exec" />
+    <p class="hint">スコアの送信先です。設定方法は付属の gas_code.js を参照してください。</p>
+
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeAdmin()">キャンセル</button>
+      <button class="btn-save" onclick="saveAdmin()">保存して閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // =====================================================
+  // デフォルト設定（管理者モーダルで上書き可能）
+  // =====================================================
+  const DEFAULTS = {
+    criteria: ['構図・完成度', '創造性・独自性', '技術・表現力'],
+    gasUrl: ''
+  };
+  // =====================================================
+
+  let config = {};
+  let judgeNameVal = '';
+  let currentIndex = 0;
+  let scores = [];   // [{imageUrl, c1, c2, c3}, ...]
+
+  // --- 設定ロード ---
+  function loadConfig() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('scoreConfig') || '{}');
+      config = {
+        criteria: saved.criteria || DEFAULTS.criteria,
+        gasUrl:   saved.gasUrl   || DEFAULTS.gasUrl,
+        images: []
+      };
+    } catch { config = { criteria: [...DEFAULTS.criteria], gasUrl: '', images: [] }; }
+  }
+
+  // --- figure/manifest.json から画像リストを取得 ---
+  async function loadImages() {
+    try {
+      const res = await fetch('figure/manifest.json?t=' + Date.now());
+      const filenames = await res.json();
+      config.images = filenames.map(f => 'figure/' + f);
+    } catch {
+      config.images = [];
+    }
+  }
+
+  // --- スタート ---
+  async function startScoring() {
+    judgeNameVal = document.getElementById('judge-name-input').value.trim();
+    if (!judgeNameVal) { alert('審査員名を入力してください'); return; }
+
+    const btn = document.getElementById('btn-start');
+    btn.disabled = true;
+    btn.textContent = '画像を読み込み中...';
+    await loadImages();
+    btn.disabled = false;
+    btn.textContent = '採点を開始する';
+
+    if (!config.images.length) { alert('figure/ フォルダに画像がありません。\nbash generate_manifest.sh を実行してください。'); return; }
+
+    scores = config.images.map(url => ({ imageUrl: url, c1: 0, c2: 0, c3: 0 }));
+    currentIndex = 0;
+
+    document.getElementById('screen-start').style.display = 'none';
+    const ss = document.getElementById('screen-score');
+    ss.style.display = 'flex';
+    document.getElementById('header-judge').textContent = judgeNameVal + ' さん';
+
+    buildCriteria();
+    showImage(0);
+  }
+
+  // --- 審査項目UIを生成 ---
+  function buildCriteria() {
+    const list = document.getElementById('criteria-list');
+    list.innerHTML = config.criteria.map((name, ci) => `
+      <div class="criterion">
+        <div class="criterion-label">${name}（5点満点）</div>
+        <div class="stars" id="stars-${ci}">
+          ${[1,2,3,4,5].map(v => `
+            <button class="star-btn" data-ci="${ci}" data-val="${v}" onclick="selectScore(${ci},${v})">${v}</button>
+          `).join('')}
+        </div>
+      </div>`).join('');
+  }
+
+  // --- 画像表示 ---
+  function showImage(idx) {
+    const total = config.images.length;
+    document.getElementById('progress-text').textContent = `${idx + 1} / ${total}`;
+    document.getElementById('progress-bar').style.width = ((idx + 1) / total * 100) + '%';
+
+    const area = document.getElementById('image-area');
+    const url = config.images[idx];
+    area.innerHTML = url
+      ? `<img src="${url}" alt="作品 ${idx+1}" onerror="this.parentElement.innerHTML='<div class=image-placeholder>画像を読み込めませんでした</div>'">`
+      : `<div class="image-placeholder">画像URLが設定されていません</div>`;
+
+    // スコアリセット
+    scores[idx] = { imageUrl: url, c1: 0, c2: 0, c3: 0 };
+    config.criteria.forEach((_, ci) => updateStars(ci, 0));
+    checkAllScored();
+  }
+
+  // --- 点数選択 ---
+  function selectScore(ci, val) {
+    const key = ['c1','c2','c3'][ci];
+    scores[currentIndex][key] = val;
+    updateStars(ci, val);
+    checkAllScored();
+  }
+
+  function updateStars(ci, val) {
+    document.querySelectorAll(`#stars-${ci} .star-btn`).forEach(btn => {
+      btn.classList.toggle('selected', parseInt(btn.dataset.val) === val);
+    });
+  }
+
+  function checkAllScored() {
+    const s = scores[currentIndex];
+    document.getElementById('btn-next').disabled = !(s.c1 && s.c2 && s.c3);
+  }
+
+  // --- 次へ ---
+  function nextImage() {
+    currentIndex++;
+    if (currentIndex >= config.images.length) {
+      showDone();
+    } else {
+      showImage(currentIndex);
+    }
+  }
+
+  // --- 完了 ---
+  function showDone() {
+    document.getElementById('screen-score').style.display = 'none';
+    const done = document.getElementById('screen-done');
+    done.style.display = 'flex';
+    sendResults();
+  }
+
+  async function sendResults() {
+    const status = document.getElementById('sending-status');
+    if (!config.gasUrl) {
+      status.textContent = '※ Google Apps Script URLが未設定のため、データは送信されていません。';
+      return;
+    }
+    status.textContent = 'データを送信中...';
+    try {
+      const payload = {
+        judge: judgeNameVal,
+        timestamp: new Date().toISOString(),
+        scores: scores
+      };
+      await fetch(config.gasUrl, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      status.textContent = 'データをスプレッドシートに送信しました。';
+    } catch (e) {
+      status.textContent = 'データ送信に失敗しました: ' + e.message;
+    }
+  }
+
+  // --- 管理者モーダル ---
+  function openAdmin() {
+    document.getElementById('cfg-c1').value = config.criteria[0] || '';
+    document.getElementById('cfg-c2').value = config.criteria[1] || '';
+    document.getElementById('cfg-c3').value = config.criteria[2] || '';
+    document.getElementById('cfg-images').value = config.images.join('\n');
+    document.getElementById('cfg-gas-url').value = config.gasUrl || '';
+    document.getElementById('admin-modal').classList.add('open');
+  }
+
+  function closeAdmin() {
+    document.getElementById('admin-modal').classList.remove('open');
+  }
+
+  function saveAdmin() {
+    config.criteria = [
+      document.getElementById('cfg-c1').value.trim() || DEFAULTS.criteria[0],
+      document.getElementById('cfg-c2').value.trim() || DEFAULTS.criteria[1],
+      document.getElementById('cfg-c3').value.trim() || DEFAULTS.criteria[2],
+    ];
+    config.gasUrl = document.getElementById('cfg-gas-url').value.trim();
+    localStorage.setItem('scoreConfig', JSON.stringify(config));
+    closeAdmin();
+    alert('設定を保存しました。');
+  }
+
+  // 初期化
+  loadConfig();
+</script>
+
+</body>
+</html>
