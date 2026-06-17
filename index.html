@@ -262,13 +262,13 @@
 
 <!-- ===== スタート画面 ===== -->
 <div id="screen-start">
-  <h1>採点システム</h1>
-  <p>審査員のお名前を入力して開始してください</p>
+  <h1>Scoring System</h1>
+  <p>Please enter your name to begin.</p>
   <div class="input-group">
-    <label>審査員名</label>
-    <input type="text" id="judge-name-input" placeholder="例：山田 太郎" />
+    <label>Judge Name</label>
+    <input type="text" id="judge-name-input" placeholder="e.g. John Smith" />
   </div>
-  <button class="btn-primary" id="btn-start" onclick="startScoring()">採点を開始する</button>
+  <button class="btn-primary" id="btn-start" onclick="startScoring()">Start Scoring</button>
 </div>
 
 <!-- ===== 採点画面 ===== -->
@@ -287,36 +287,36 @@
 
   <div class="scoring-panel">
     <div class="total-score-row">
-      <span class="total-label">合計</span>
+      <span class="total-label">Total</span>
       <span class="total-value" id="total-display">—</span>
-      <span class="total-max">/ 20点</span>
+      <span class="total-max">/ 20 pts</span>
     </div>
     <div class="criteria-list" id="criteria-list"></div>
-    <button class="btn-next" id="btn-next" onclick="nextImage()" disabled>次へ →</button>
+    <button class="btn-next" id="btn-next" onclick="nextImage()" disabled>Next →</button>
   </div>
 </div>
 
 <!-- ===== 完了画面 ===== -->
 <div id="screen-done">
-  <h2>採点完了</h2>
-  <p>すべての作品の採点が完了しました。<br>ご協力ありがとうございました。</p>
+  <h2>Scoring Complete</h2>
+  <p>You have scored all entries.<br>Thank you for your participation!</p>
   <p class="sending-msg" id="sending-status"></p>
 </div>
 
 <!-- ===== 管理者ボタン ===== -->
-<button class="admin-toggle" onclick="openAdmin()">⚙ 管理者設定</button>
+<button class="admin-toggle" onclick="openAdmin()">⚙ Admin</button>
 
 <!-- ===== 管理者モーダル ===== -->
 <div class="modal-overlay" id="admin-modal">
   <div class="modal">
-    <h3>管理者設定</h3>
-    <p class="hint">📁 画像は <code>figure/</code> フォルダに入れて <code>bash generate_manifest.sh</code> を実行してください。</p>
+    <h3>Admin Settings</h3>
+    <p class="hint">📁 Place images in the <code>figure/</code> folder and run <code>bash generate_manifest.sh</code>.</p>
     <label>Google Apps Script Web App URL</label>
     <input type="text" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/xxxxx/exec" />
-    <p class="hint">スコアの送信先GASのURLを貼ってください。</p>
+    <p class="hint">Paste the GAS URL where scores will be sent.</p>
     <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeAdmin()">キャンセル</button>
-      <button class="btn-save" onclick="saveAdmin()">保存して閉じる</button>
+      <button class="btn-cancel" onclick="closeAdmin()">Cancel</button>
+      <button class="btn-save" onclick="saveAdmin()">Save</button>
     </div>
   </div>
 </div>
@@ -327,9 +327,9 @@
   // 完成度は weight:2 → 最大10点、他は weight:1 → 最大5点ずつ、合計20点
   // =====================================================
   const CRITERIA = [
-    { key: 'c1', label: '完成度',       weight: 2, note: '×2（最大10点）' },
-    { key: 'c2', label: 'コントラスト', weight: 1, note: '×1（最大5点）'  },
-    { key: 'c3', label: 'カップバランス', weight: 1, note: '×1（最大5点）' },
+    { key: 'c1', label: 'Completion',     weight: 2, note: '×2 (max 10 pts)' },
+    { key: 'c2', label: 'Contrast',       weight: 1, note: '×1 (max 5 pts)'  },
+    { key: 'c3', label: 'Cup Balance',    weight: 1, note: '×1 (max 5 pts)'  },
   ];
   const HALF_STEPS = [0.5,1,1.5,2,2.5,3,3.5,4,4.5,5];
 
@@ -359,17 +359,17 @@
   // --- スタート ---
   async function startScoring() {
     judgeNameVal = document.getElementById('judge-name-input').value.trim();
-    if (!judgeNameVal) { alert('審査員名を入力してください'); return; }
+    if (!judgeNameVal) { alert('Please enter your name.'); return; }
 
     const btn = document.getElementById('btn-start');
     btn.disabled = true;
-    btn.textContent = '画像を読み込み中...';
+    btn.textContent = 'Loading images...';
     await loadImages();
     btn.disabled = false;
-    btn.textContent = '採点を開始する';
+    btn.textContent = 'Start Scoring';
 
     if (!images.length) {
-      alert('figure/ フォルダに画像がありません。\nbash generate_manifest.sh を実行してください。');
+      alert('No images found in figure/ folder.\nPlease run: bash generate_manifest.sh');
       return;
     }
 
@@ -412,7 +412,7 @@
     const area = document.getElementById('image-area');
     const url = images[idx];
     area.innerHTML = `<img src="${url}" alt="作品 ${idx+1}"
-      onerror="this.parentElement.innerHTML='<div class=image-placeholder>画像を読み込めませんでした</div>'">`;
+      onerror="this.parentElement.innerHTML='<div class=image-placeholder>Failed to load image</div>'">`;
 
     scores[idx] = { imageUrl: url, c1: null, c2: null, c3: null };
     CRITERIA.forEach(cr => {
@@ -468,10 +468,10 @@
   async function sendResults() {
     const status = document.getElementById('sending-status');
     if (!gasUrl) {
-      status.textContent = '※ GAS URLが未設定のため、データは送信されていません。';
+      status.textContent = '※ GAS URL is not set. Scores were not sent.';
       return;
     }
-    status.textContent = 'データを送信中...';
+    status.textContent = 'Sending data...';
     try {
       const payload = {
         judge: judgeNameVal,
@@ -483,9 +483,9 @@
       };
       const params = new URLSearchParams({ data: JSON.stringify(payload) });
       await fetch(gasUrl + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
-      status.textContent = 'スプレッドシートに送信しました。';
+      status.textContent = 'Scores sent to spreadsheet successfully.';
     } catch (e) {
-      status.textContent = 'データ送信に失敗しました: ' + e.message;
+      status.textContent = 'Failed to send data: ' + e.message;
     }
   }
 
@@ -501,7 +501,7 @@
     gasUrl = document.getElementById('cfg-gas-url').value.trim();
     localStorage.setItem('scoreConfig2', JSON.stringify({ gasUrl }));
     closeAdmin();
-    alert('設定を保存しました。');
+    alert('Settings saved.');
   }
 
   loadConfig();
