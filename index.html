@@ -24,7 +24,6 @@
       padding: 32px;
       gap: 24px;
     }
-
     #screen-start h1 { font-size: 28px; font-weight: 700; letter-spacing: 0.06em; }
     #screen-start p  { color: #aaa; font-size: 14px; }
 
@@ -60,7 +59,7 @@
     #screen-score { display: none; flex-direction: column; min-height: 100vh; }
 
     .score-header {
-      padding: 14px 20px;
+      padding: 12px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -78,17 +77,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      min-height: 40vh;
+      padding: 16px;
+      min-height: 35vh;
     }
-
     .image-area img {
       max-width: 100%;
-      max-height: 50vh;
+      max-height: 42vh;
       border-radius: 8px;
       object-fit: contain;
     }
-
     .image-placeholder {
       width: 100%;
       max-width: 480px;
@@ -102,45 +99,64 @@
       font-size: 14px;
     }
 
+    /* ===== 採点パネル ===== */
     .scoring-panel {
       background: #1a1a1a;
       border-top: 1px solid #2a2a2a;
-      padding: 20px;
+      padding: 16px 20px 20px;
     }
 
-    .criteria-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
-
-    .criterion { display: flex; flex-direction: column; gap: 8px; }
-    .criterion-label { font-size: 13px; color: #bbb; font-weight: 500; }
-
-    .stars {
+    .total-score-row {
       display: flex;
-      gap: 8px;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .total-label { font-size: 12px; color: #666; }
+    .total-value { font-size: 26px; font-weight: 700; color: #f0f0f0; }
+    .total-max   { font-size: 13px; color: #555; }
+
+    .criteria-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+
+    .criterion { display: flex; flex-direction: column; gap: 6px; }
+
+    .criterion-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .criterion-label { font-size: 13px; color: #ccc; font-weight: 600; }
+    .criterion-meta  { font-size: 11px; color: #555; }
+    .criterion-score { font-size: 15px; font-weight: 700; color: #f0f0f0; min-width: 28px; text-align: right; }
+
+    .half-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
     }
 
-    .star-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 8px;
-      border: 1.5px solid #333;
-      background: #222;
-      color: #666;
-      font-size: 18px;
+    .half-btn {
+      width: calc((100% - 45px) / 10);
+      min-width: 28px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1.5px solid #2e2e2e;
+      background: #1e1e1e;
+      color: #555;
+      font-size: 12px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.12s;
-      font-weight: 700;
+      transition: all 0.1s;
+      font-weight: 600;
     }
-
-    .star-btn:hover { border-color: #888; color: #ddd; }
-    .star-btn.selected { background: #f0f0f0; color: #111; border-color: #f0f0f0; }
-
-    .btn-row { display: flex; gap: 10px; }
+    .half-btn:hover { border-color: #666; color: #ccc; }
+    .half-btn.selected { background: #f0f0f0; color: #111; border-color: #f0f0f0; }
 
     .btn-next {
-      flex: 1;
+      width: 100%;
       background: #f0f0f0;
       color: #111;
       border: none;
@@ -152,7 +168,7 @@
       transition: opacity 0.15s;
     }
     .btn-next:hover { opacity: 0.85; }
-    .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-next:disabled { opacity: 0.3; cursor: not-allowed; }
 
     /* ===== 完了画面 ===== */
     #screen-done {
@@ -167,17 +183,16 @@
     }
     #screen-done h2 { font-size: 24px; font-weight: 700; }
     #screen-done p  { color: #aaa; font-size: 14px; line-height: 1.7; }
+    .sending-msg { color: #666; font-size: 13px; }
 
-    .sending-msg { color: #888; font-size: 13px; }
-
-    /* ===== 管理者設定モーダル ===== */
+    /* ===== 管理者設定 ===== */
     .admin-toggle {
       position: fixed;
       bottom: 16px;
       right: 16px;
-      background: #222;
-      border: 1px solid #333;
-      color: #666;
+      background: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      color: #555;
       border-radius: 20px;
       padding: 6px 14px;
       font-size: 12px;
@@ -201,14 +216,13 @@
       border-radius: 12px;
       padding: 24px;
       width: 100%;
-      max-width: 560px;
+      max-width: 480px;
       max-height: 90vh;
       overflow-y: auto;
     }
     .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
-
-    .modal label { font-size: 12px; color: #aaa; display: block; margin-bottom: 4px; margin-top: 12px; }
-    .modal input, .modal textarea {
+    .modal label { font-size: 12px; color: #aaa; display: block; margin-bottom: 4px; margin-top: 14px; }
+    .modal input {
       width: 100%;
       padding: 10px 12px;
       background: #111;
@@ -218,8 +232,7 @@
       font-size: 13px;
       font-family: monospace;
     }
-    .modal textarea { height: 140px; resize: vertical; }
-    .modal input:focus, .modal textarea:focus { outline: none; border-color: #555; }
+    .modal input:focus { outline: none; border-color: #555; }
 
     .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
     .btn-save {
@@ -242,8 +255,7 @@
       font-size: 14px;
       cursor: pointer;
     }
-
-    .hint { font-size: 11px; color: #555; margin-top: 4px; line-height: 1.5; }
+    .hint { font-size: 11px; color: #555; margin-top: 6px; line-height: 1.6; }
   </style>
 </head>
 <body>
@@ -274,17 +286,20 @@
   </div>
 
   <div class="scoring-panel">
-    <div class="criteria-list" id="criteria-list"></div>
-    <div class="btn-row">
-      <button class="btn-next" id="btn-next" onclick="nextImage()" disabled>次へ →</button>
+    <div class="total-score-row">
+      <span class="total-label">合計</span>
+      <span class="total-value" id="total-display">—</span>
+      <span class="total-max">/ 20点</span>
     </div>
+    <div class="criteria-list" id="criteria-list"></div>
+    <button class="btn-next" id="btn-next" onclick="nextImage()" disabled>次へ →</button>
   </div>
 </div>
 
 <!-- ===== 完了画面 ===== -->
 <div id="screen-done">
   <h2>採点完了</h2>
-  <p id="done-msg">すべての作品の採点が完了しました。<br>ご協力ありがとうございました。</p>
+  <p>すべての作品の採点が完了しました。<br>ご協力ありがとうございました。</p>
   <p class="sending-msg" id="sending-status"></p>
 </div>
 
@@ -295,22 +310,10 @@
 <div class="modal-overlay" id="admin-modal">
   <div class="modal">
     <h3>管理者設定</h3>
-
-    <label>審査項目 1</label>
-    <input type="text" id="cfg-c1" placeholder="例：構図・完成度" />
-
-    <label>審査項目 2</label>
-    <input type="text" id="cfg-c2" placeholder="例：創造性・独自性" />
-
-    <label>審査項目 3</label>
-    <input type="text" id="cfg-c3" placeholder="例：技術・表現力" />
-
-    <p class="hint" style="margin-top:12px">📁 画像は <code>figure/</code> フォルダに入れて、<code>bash generate_manifest.sh</code> を実行すると自動で読み込まれます。</p>
-
+    <p class="hint">📁 画像は <code>figure/</code> フォルダに入れて <code>bash generate_manifest.sh</code> を実行してください。</p>
     <label>Google Apps Script Web App URL</label>
     <input type="text" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/xxxxx/exec" />
-    <p class="hint">スコアの送信先です。設定方法は付属の gas_code.js を参照してください。</p>
-
+    <p class="hint">スコアの送信先GASのURLを貼ってください。</p>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeAdmin()">キャンセル</button>
       <button class="btn-save" onclick="saveAdmin()">保存して閉じる</button>
@@ -320,40 +323,37 @@
 
 <script>
   // =====================================================
-  // デフォルト設定（管理者モーダルで上書き可能）
+  // 審査項目（固定）
+  // 完成度は weight:2 → 最大10点、他は weight:1 → 最大5点ずつ、合計20点
   // =====================================================
-  const DEFAULTS = {
-    criteria: ['構図・完成度', '創造性・独自性', '技術・表現力'],
-    gasUrl: ''
-  };
-  // =====================================================
+  const CRITERIA = [
+    { key: 'c1', label: '完成度',       weight: 2, note: '×2（最大10点）' },
+    { key: 'c2', label: 'コントラスト', weight: 1, note: '×1（最大5点）'  },
+    { key: 'c3', label: 'カップバランス', weight: 1, note: '×1（最大5点）' },
+  ];
+  const HALF_STEPS = [0.5,1,1.5,2,2.5,3,3.5,4,4.5,5];
 
-  let config = {};
+  let gasUrl = '';
+  let images = [];
   let judgeNameVal = '';
   let currentIndex = 0;
-  let scores = [];   // [{imageUrl, c1, c2, c3}, ...]
+  let scores = [];
 
   // --- 設定ロード ---
   function loadConfig() {
     try {
-      const saved = JSON.parse(localStorage.getItem('scoreConfig') || '{}');
-      config = {
-        criteria: saved.criteria || DEFAULTS.criteria,
-        gasUrl:   saved.gasUrl   || DEFAULTS.gasUrl,
-        images: []
-      };
-    } catch { config = { criteria: [...DEFAULTS.criteria], gasUrl: '', images: [] }; }
+      const saved = JSON.parse(localStorage.getItem('scoreConfig2') || '{}');
+      gasUrl = saved.gasUrl || '';
+    } catch { gasUrl = ''; }
   }
 
-  // --- figure/manifest.json から画像リストを取得 ---
+  // --- figure/manifest.json から画像取得 ---
   async function loadImages() {
     try {
       const res = await fetch('figure/manifest.json?t=' + Date.now());
       const filenames = await res.json();
-      config.images = filenames.map(f => 'figure/' + f);
-    } catch {
-      config.images = [];
-    }
+      images = filenames.map(f => 'figure/' + f);
+    } catch { images = []; }
   }
 
   // --- スタート ---
@@ -368,29 +368,36 @@
     btn.disabled = false;
     btn.textContent = '採点を開始する';
 
-    if (!config.images.length) { alert('figure/ フォルダに画像がありません。\nbash generate_manifest.sh を実行してください。'); return; }
+    if (!images.length) {
+      alert('figure/ フォルダに画像がありません。\nbash generate_manifest.sh を実行してください。');
+      return;
+    }
 
-    scores = config.images.map(url => ({ imageUrl: url, c1: 0, c2: 0, c3: 0 }));
+    scores = images.map(url => ({ imageUrl: url, c1: null, c2: null, c3: null }));
     currentIndex = 0;
 
     document.getElementById('screen-start').style.display = 'none';
-    const ss = document.getElementById('screen-score');
-    ss.style.display = 'flex';
+    document.getElementById('screen-score').style.display = 'flex';
     document.getElementById('header-judge').textContent = judgeNameVal + ' さん';
 
     buildCriteria();
     showImage(0);
   }
 
-  // --- 審査項目UIを生成 ---
+  // --- 審査項目UI生成 ---
   function buildCriteria() {
     const list = document.getElementById('criteria-list');
-    list.innerHTML = config.criteria.map((name, ci) => `
+    list.innerHTML = CRITERIA.map(cr => `
       <div class="criterion">
-        <div class="criterion-label">${name}（5点満点）</div>
-        <div class="stars" id="stars-${ci}">
-          ${[1,2,3,4,5].map(v => `
-            <button class="star-btn" data-ci="${ci}" data-val="${v}" onclick="selectScore(${ci},${v})">${v}</button>
+        <div class="criterion-header">
+          <span class="criterion-label">${cr.label}</span>
+          <span class="criterion-meta">${cr.note}</span>
+          <span class="criterion-score" id="score-display-${cr.key}">—</span>
+        </div>
+        <div class="half-btns" id="btns-${cr.key}">
+          ${HALF_STEPS.map(v => `
+            <button class="half-btn" data-key="${cr.key}" data-val="${v}"
+              onclick="selectScore('${cr.key}',${v})">${v}</button>
           `).join('')}
         </div>
       </div>`).join('');
@@ -398,63 +405,70 @@
 
   // --- 画像表示 ---
   function showImage(idx) {
-    const total = config.images.length;
+    const total = images.length;
     document.getElementById('progress-text').textContent = `${idx + 1} / ${total}`;
     document.getElementById('progress-bar').style.width = ((idx + 1) / total * 100) + '%';
 
     const area = document.getElementById('image-area');
-    const url = config.images[idx];
-    area.innerHTML = url
-      ? `<img src="${url}" alt="作品 ${idx+1}" onerror="this.parentElement.innerHTML='<div class=image-placeholder>画像を読み込めませんでした</div>'">`
-      : `<div class="image-placeholder">画像URLが設定されていません</div>`;
+    const url = images[idx];
+    area.innerHTML = `<img src="${url}" alt="作品 ${idx+1}"
+      onerror="this.parentElement.innerHTML='<div class=image-placeholder>画像を読み込めませんでした</div>'">`;
 
-    // スコアリセット
-    scores[idx] = { imageUrl: url, c1: 0, c2: 0, c3: 0 };
-    config.criteria.forEach((_, ci) => updateStars(ci, 0));
-    checkAllScored();
+    scores[idx] = { imageUrl: url, c1: null, c2: null, c3: null };
+    CRITERIA.forEach(cr => {
+      updateButtons(cr.key, null);
+      document.getElementById('score-display-' + cr.key).textContent = '—';
+    });
+    document.getElementById('total-display').textContent = '—';
+    document.getElementById('btn-next').disabled = true;
   }
 
   // --- 点数選択 ---
-  function selectScore(ci, val) {
-    const key = ['c1','c2','c3'][ci];
+  function selectScore(key, val) {
     scores[currentIndex][key] = val;
-    updateStars(ci, val);
+    updateButtons(key, val);
+    document.getElementById('score-display-' + key).textContent = val;
+    updateTotal();
     checkAllScored();
   }
 
-  function updateStars(ci, val) {
-    document.querySelectorAll(`#stars-${ci} .star-btn`).forEach(btn => {
-      btn.classList.toggle('selected', parseInt(btn.dataset.val) === val);
+  function updateButtons(key, val) {
+    document.querySelectorAll(`#btns-${key} .half-btn`).forEach(btn => {
+      btn.classList.toggle('selected', parseFloat(btn.dataset.val) === val);
     });
+  }
+
+  function updateTotal() {
+    const s = scores[currentIndex];
+    const allSet = CRITERIA.every(cr => s[cr.key] !== null);
+    if (!allSet) return;
+    const total = CRITERIA.reduce((sum, cr) => sum + (s[cr.key] || 0) * cr.weight, 0);
+    document.getElementById('total-display').textContent = total.toFixed(1).replace(/\.0$/, '');
   }
 
   function checkAllScored() {
     const s = scores[currentIndex];
-    document.getElementById('btn-next').disabled = !(s.c1 && s.c2 && s.c3);
+    document.getElementById('btn-next').disabled = !CRITERIA.every(cr => s[cr.key] !== null);
   }
 
   // --- 次へ ---
   function nextImage() {
     currentIndex++;
-    if (currentIndex >= config.images.length) {
-      showDone();
-    } else {
-      showImage(currentIndex);
-    }
+    if (currentIndex >= images.length) showDone();
+    else showImage(currentIndex);
   }
 
-  // --- 完了 ---
+  // --- 完了・送信 ---
   function showDone() {
     document.getElementById('screen-score').style.display = 'none';
-    const done = document.getElementById('screen-done');
-    done.style.display = 'flex';
+    document.getElementById('screen-done').style.display = 'flex';
     sendResults();
   }
 
   async function sendResults() {
     const status = document.getElementById('sending-status');
-    if (!config.gasUrl) {
-      status.textContent = '※ Google Apps Script URLが未設定のため、データは送信されていません。';
+    if (!gasUrl) {
+      status.textContent = '※ GAS URLが未設定のため、データは送信されていません。';
       return;
     }
     status.textContent = 'データを送信中...';
@@ -462,14 +476,17 @@
       const payload = {
         judge: judgeNameVal,
         timestamp: new Date().toISOString(),
-        scores: scores
+        scores: scores.map(s => ({
+          ...s,
+          weighted_total: CRITERIA.reduce((sum, cr) => sum + (s[cr.key] || 0) * cr.weight, 0)
+        }))
       };
-      await fetch(config.gasUrl, {
+      await fetch(gasUrl, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: { 'Content-Type': 'application/json' }
       });
-      status.textContent = 'データをスプレッドシートに送信しました。';
+      status.textContent = 'スプレッドシートに送信しました。';
     } catch (e) {
       status.textContent = 'データ送信に失敗しました: ' + e.message;
     }
@@ -477,31 +494,19 @@
 
   // --- 管理者モーダル ---
   function openAdmin() {
-    document.getElementById('cfg-c1').value = config.criteria[0] || '';
-    document.getElementById('cfg-c2').value = config.criteria[1] || '';
-    document.getElementById('cfg-c3').value = config.criteria[2] || '';
-    document.getElementById('cfg-images').value = config.images.join('\n');
-    document.getElementById('cfg-gas-url').value = config.gasUrl || '';
+    document.getElementById('cfg-gas-url').value = gasUrl;
     document.getElementById('admin-modal').classList.add('open');
   }
-
   function closeAdmin() {
     document.getElementById('admin-modal').classList.remove('open');
   }
-
   function saveAdmin() {
-    config.criteria = [
-      document.getElementById('cfg-c1').value.trim() || DEFAULTS.criteria[0],
-      document.getElementById('cfg-c2').value.trim() || DEFAULTS.criteria[1],
-      document.getElementById('cfg-c3').value.trim() || DEFAULTS.criteria[2],
-    ];
-    config.gasUrl = document.getElementById('cfg-gas-url').value.trim();
-    localStorage.setItem('scoreConfig', JSON.stringify(config));
+    gasUrl = document.getElementById('cfg-gas-url').value.trim();
+    localStorage.setItem('scoreConfig2', JSON.stringify({ gasUrl }));
     closeAdmin();
     alert('設定を保存しました。');
   }
 
-  // 初期化
   loadConfig();
 </script>
 
