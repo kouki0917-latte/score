@@ -333,18 +333,23 @@
   ];
   const HALF_STEPS = [0.5,1,1.5,2,2.5,3,3.5,4,4.5,5];
 
-  let gasUrl = '';
+  // =====================================================
+  // ▼ GAS URL（直接記載）
+  // =====================================================
+  let gasUrl = 'https://script.google.com/macros/s/AKfycbzgKJUhjN0w1ijpxBbhCGMg6Eet7JKh3bd49qvMYFMO8ofE9Wm4uNDCyiSFCfo4XeJF/exec';
+  // =====================================================
+
   let images = [];
   let judgeNameVal = '';
   let currentIndex = 0;
   let scores = [];
 
-  // --- 設定ロード ---
+  // --- 設定ロード（localStorageで上書き可能） ---
   function loadConfig() {
     try {
       const saved = JSON.parse(localStorage.getItem('scoreConfig2') || '{}');
-      gasUrl = saved.gasUrl || '';
-    } catch { gasUrl = ''; }
+      if (saved.gasUrl) gasUrl = saved.gasUrl;
+    } catch {}
   }
 
   // --- figure/manifest.json から画像取得 ---
