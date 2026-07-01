@@ -54,9 +54,16 @@ function doGet(e) {
   }
 }
 
+// シート削除など変更時に自動でResultsを再計算する
+// GASエディタで：トリガー → onSheetChange → イベント種類「変更時」で設定
+function onSheetChange(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  updateResults(ss);
+}
+
 function updateResults(ss) {
   // 審査員シート一覧（Results以外の全シート）
-  const excludeSheets = ['Results'];
+  const excludeSheets = ['Results', 'Scores'];
   const judgeSheets = ss.getSheets().filter(s => !excludeSheets.includes(s.getName()));
 
   // 全審査員のデータを集める
