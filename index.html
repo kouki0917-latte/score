@@ -360,7 +360,7 @@
       // 旧形式（文字列配列）と新形式（{file,name}配列）の両方に対応
       images = entries.map(e => typeof e === 'string'
         ? { url: 'figure/' + encodeURIComponent(e), name: e.replace(/\.[^.]+$/, '') }
-        : { url: 'figure/' + e.file, name: e.name }
+        : { url: 'figure/' + encodeURIComponent(e.file), name: e.name }
       );
     } catch { images = []; }
   }
