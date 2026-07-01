@@ -356,8 +356,12 @@
   async function loadImages() {
     try {
       const res = await fetch('figure/manifest.json?t=' + Date.now());
-      const filenames = await res.json();
-      images = filenames.map(f => 'figure/' + encodeURIComponent(f));
+      const entries = await res.json();
+      // 旧形式（文字列配列）と新形式（{file,name}配列）の両方に対応
+      images = entries.map(e => typeof e === 'string'
+        ? { url: 'figure/' + encodeURIComponent(e), name: e.replace(/\.[^.]+$/, '') }
+        : { url: 'figure/' + e.file, name: e.name }
+      );
     } catch { images = []; }
   }
 
@@ -378,7 +382,7 @@
       return;
     }
 
-    scores = images.map(url => ({ imageUrl: url, c1: null, c2: null, c3: null }));
+    scores = images.map(img => ({ imageUrl: img.name, c1: null, c2: null, c3: null }));
     currentIndex = 0;
 
     document.getElementById('screen-start').style.display = 'none';
@@ -415,11 +419,11 @@
     document.getElementById('progress-bar').style.width = ((idx + 1) / total * 100) + '%';
 
     const area = document.getElementById('image-area');
-    const url = images[idx];
-    area.innerHTML = `<img src="${url}" alt="作品 ${idx+1}"
+    const img = images[idx];
+    area.innerHTML = `<img src="${img.url}" alt="${img.name}"
       onerror="this.parentElement.innerHTML='<div class=image-placeholder>Failed to load image</div>'">`;
 
-    scores[idx] = { imageUrl: url, c1: null, c2: null, c3: null };
+    scores[idx] = { imageUrl: img.name, c1: null, c2: null, c3: null };
     CRITERIA.forEach(cr => {
       updateButtons(cr.key, null);
       document.getElementById('score-display-' + cr.key).textContent = '—';
